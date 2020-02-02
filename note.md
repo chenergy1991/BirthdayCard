@@ -1,6 +1,6 @@
-###Spring Boot开发初体验
+### Spring Boot开发初体验
 
-####0x00前言
+#### 0x00前言
 
 SpringBoot是轻量级的Java开发框架，在继承Spring框架原有优秀特性的同时，通过简化配置来进一步简化了Spring应用的搭建和开发过程。
 
@@ -16,7 +16,7 @@ SpringBoot是轻量级的Java开发框架，在继承Spring框架原有优秀特
 
 在这一版本的代码中，小编暂未对一些漏洞进行防御，将在后面的博客对这些漏洞进行修复和介绍。
 
-####0x01项目结构概览
+#### 0x01项目结构概览
 
 小应用的工程结构如图所示。
 
@@ -35,11 +35,11 @@ Controller-->service接口-->serviceImpl-->dao接口-->daoImpl-->mapper-->db
 * 前端组件库：bootstrap
 * JDK：9.0.4
 
-####0x02代码解析
+#### 0x02代码解析
 
 这个工程基于《Spring Boot + Vue全栈开发实战》第5章的例程进行二次开发。接下来依次对工程的3个功能点做代码解析。
 
-#####2.1 通过网页对人物生日信息的增删改查
+##### 2.1 通过网页对人物生日信息的增删改查
 
 这部分代码涉及到了Spring Boot整合的持久层技术“MyBatis”以及视图层技术“Thymeleaf”。先来看Mybatis方面。
 
@@ -714,7 +714,7 @@ public class PeopleController {
 
 注： 在这个小应用中，通过网页对人物生日信息的增删改查处理是较为相似的（均包含了“配置控制器”和“创建视图”），这里仅对“查”进行了简介，不对“增删改”做介绍了。前端的界面很粗糙，这里也不做介绍了。感兴趣的小伙伴可以自行阅读这部分的代码；
 
-#####2.2 简易的管理员登录功能（未登录则不能访问页面）
+##### 2.2 简易的管理员登录功能（未登录则不能访问页面）
 
 为了给系统增加管理员登录功能，使未登录的用户不能访问页面，可以考虑使用Spring Boot中的拦截器。创建拦截器实现LoginInterceptor接口，代码如下：
 
@@ -764,7 +764,8 @@ public class LoginInterceptor implements HandlerInterceptor {
     }
 }
 ```
-拦截器中的方法将按preHandle-->Controller-->postHandle-->afterCompletion的顺序执行。注意只有preHandle方法返回true时，后面的方法才会执行。判断逻辑为：在访问Controller类的方法之前，会先判断HttpSession是否为空，若不为空，则返回“false”，否则返回“true”。
+拦截器中的方法将按preHandle-->Controller-->postHandle-->afterCompletion的顺序执行。注意只有preHandle方法返回true时，后面的方法才会执行。
+该拦截器的判断逻辑为：在访问Controller类的方法之前，会先判断HttpSession是否为空，若不为空，则返回false，否则返回true。
 
 
 
@@ -782,7 +783,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 SpringBoot+MyBatis+Thymeleaf做
 
 
-###登录验证功能
+### 登录验证功能
 [SpringBoot + thymeleaf 实现简单的登陆验证](https://www.jianshu.com/p/442dd9de4e90)
 
 ![avatar](doc-files/logo.png)
