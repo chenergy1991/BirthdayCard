@@ -64,7 +64,7 @@ public class AdminController {
         ModelAndView mv = new ModelAndView();
         String url = "fail";
         if(admin!=null){
-            System.out.print("Successful!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.print("登录成功");
             List<People> allPeople = peopleService.getAllPeople();
             mv.addObject("people", allPeople);
             url = "peopleControlPanel";
@@ -72,19 +72,5 @@ public class AdminController {
         }
         mv.setViewName(url);
         return mv;
-
-        //ModelAndView mv = new ModelAndView("index2");
-        //ModelAndView mv2 = new ModelAndView("loginError");
-        /*
-        People people = userLoginService.userLogin(username, password);
-        String name = people.getUserName();
-        mv.addObject("people", name);
-
-        if (people!=null)
-            return mv;
-        return  mv2;
-        */
-
-
     }
 }

@@ -6,7 +6,7 @@ SpringBoot是轻量级的Java开发框架，在继承Spring框架原有优秀特
 
 小编在近期学习了一点Spring Boot开发，同时编写了小应用“birthday card”，并决定通过这篇博客将近阶段的学习笔记记录下来。
 
-这份源码的下载地址如下：[birthday card](https://github.com/chenergy1991/DetectionScript)
+这份源码的下载地址如下：[birthday card](https://github.com/chenergy1991/BirthdayCard)
 
 小应用的功能和页面都很粗糙，主要为以下几点：
 
@@ -14,7 +14,7 @@ SpringBoot是轻量级的Java开发框架，在继承Spring框架原有优秀特
 2. 简易的管理员登录功能（未登录则不能访问页面）
 3. 生日提醒功能
 
-在这一版本的代码中，小编暂未对一些漏洞进行防御，将在后面的博客对这些漏洞进行修复和介绍。
+这一版本的代码存在一些问题，比如暂未对一些漏洞进行防御、暂未进行参数校验。小编将在后面的版本中进行介绍和补充。
 
 #### 0x01项目结构概览
 
@@ -34,6 +34,7 @@ Controller-->service接口-->serviceImpl-->dao接口-->daoImpl-->mapper-->db
 * Spring Boot整合视图层技术：Thymeleaf
 * 前端组件库：bootstrap
 * JDK：9.0.4
+* IDE: IntelliJ IDEA 2019 1.1
 
 #### 0x02代码解析
 
@@ -716,7 +717,11 @@ public class PeopleController {
 
 ##### 2.2 简易的管理员登录功能（未登录则不能访问页面）
 
-为了给系统增加管理员登录功能，使未登录的用户不能访问页面，可以考虑使用Spring Boot中的拦截器。创建拦截器实现LoginInterceptor接口，代码如下：
+为了给系统增加管理员登录功能，使未登录的用户不能访问页面，可以考虑使用Spring Boot中的拦截器。为配置拦截器，可使用以下步骤：
+
+######（1）创建一个HandlerInterceptor拦截器
+
+创建拦截器LoginInterceptor（该拦截器实现了LoginInterceptor接口），代码如下：
 
 ```
 package org.sang.component;
@@ -764,100 +769,142 @@ public class LoginInterceptor implements HandlerInterceptor {
     }
 }
 ```
-拦截器中的方法将按preHandle-->Controller-->postHandle-->afterCompletion的顺序执行。注意只有preHandle方法返回true时，后面的方法才会执行。
-该拦截器的判断逻辑为：在访问Controller类的方法之前，会先判断HttpSession是否为空，若不为空，则返回false，否则返回true。
+注：拦截器中的方法将按preHandle-->Controller-->postHandle-->afterCompletion的顺序执行。注意只有preHandle方法返回true时，后面的方法才会执行。
+该拦截器的判断逻辑为：如果“HttpSession对象中的名为“loginUser”的键值对不存在”，则返回false，否则返回true。而该键值对可在“系统管理员登录时”被创建，如图所示（具体代码可参见AdminController类）。
+
+![avatar](doc-files/adminLogin.png)
+
+######（2）配置WebMvcConfigurer拦截器
+
+创建类WebConfigurer（该类实现了WebMvcConfigurer接口，并调用了刚刚编写的拦截器LoginInterceptor），代码如下：
+
+```
+package org.sang.component;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfigurer implements WebMvcConfigurer {
+
+    @Autowired
+    private LoginInterceptor loginInterceptor;
+
+    /**
+     * 这个方法是用来配置静态资源的，比如html，js，css，等等
+     */
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    }
+
+    /**
+     * 这个方法用来注册拦截器，我们自己写好的拦截器需要通过这里添加注册才能生效
+     */
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        //addPathPatterns("/**") 表示拦截所有的请求，
+        //excludePathPatterns("/login", "/register") 表示除了登陆与注册之外，因为登陆注册不需要登陆也可以访问
+        registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns("/adminLogin.html","/adminLogin", "/search.html");
+        registry.addInterceptor(loginInterceptor).excludePathPatterns("/**","/adminLogin.html","/adminLogin", "/search.html");
+    }
+}
+```
+
+######（3）运行效果
+
+测试效果如下图所示。
+
+![avatar](doc-files/LoginInterceptor-Test.png)
+
+##### 2.3 生日提醒功能
+
+生日提醒功能运用了“@Schedule注解定时任务”功能，进而通过“查找条件”对数据库进行自动查询，若有查询结果，则进行“告警”。具体代码位于MyChedule类，代码如下：
+
+```
+package org.sang.component;
+
+import org.sang.model.People;
+import org.sang.service.PeopleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 
+@Component
+public class MyChedule {
+    @Autowired
+    PeopleService peopleService;
+
+    @Scheduled(fixedDelay = 10000)
+    public void fixedDelay(){
+        System.out.println("fixedDelay" + new Date());
+        Calendar cal = Calendar.getInstance();
+        StringBuffer buf = new StringBuffer();
+        //buf.append(cal.get(Calendar.YEAR)).append("-");
+        buf.append(cal.get(Calendar.MONTH)+1).append("-");
+        buf.append(cal.get(Calendar.DAY_OF_MONTH)+1);
+        System.out.println(buf);
+        String birthday = buf.toString();
+        List<People> allPeople = peopleService.getAllPeopleByBirthday(birthday);
+        System.out.println("明天生日人数：" + allPeople.size());
+        Iterator<People> it = allPeople.iterator();
+        //输出list对象属性的第一种方式，遍历list，得到list中封装的对象，再通过对象获得属性值
+        while (it.hasNext()) {
+            People people = (People)it.next();
+            System.out.println("人物ID："+people.getId());
+            System.out.println("人物姓名："+people.getName());
+            System.out.println("人物阳历生日："+people.getSolarCalendarBirthday());
+            System.out.println("人物阴历生日"+people.getLunarCalendarBirthday());
+
+        }
+    }
+    @Scheduled(cron = "0 37 17 ? * *")
+    public void fixTimeExecution() {
+
+        System.out.println("在指定时间17时37分执行");
+    }
+}
+
+```
+测试效果如下图所示。
+![avatar](doc-files/Scheduled.png)
+
+注：若想在指定时间执行任务，可自行编写“cron表达式”，如图所示。
+
+![avatar](doc-files/cron.png)
 
 
+#### 0x03参考资料
 
-1. 注册拦截器
+[windows下如何安装配置maven](https://jingyan.baidu.com/article/3065b3b6a00792becef8a46c.html)
 
+[Mybatis查询语句返回的对象中部分字段为null(空)](https://blog.csdn.net/m0_37961948/article/details/85344944)
 
-3. 生日提醒功能
+[SpringBoot+MyBatis+thymeleaf 增删改查实例（超详细）](https://blog.csdn.net/Woo_home/article/details/99564476)
 
+[SpringBoot集成Thymeleaf模板引擎实现数据的增删改查](https://blog.csdn.net/w252064/article/details/83998724)
 
-是笔者在初体验Spring Boot开发后所成的开源项目。
+[解决mybatis的mapper.xml查询不出数据，结果一直为null问题](https://blog.csdn.net/ITBigGod/article/details/82691295)
 
-
-SpringBoot+MyBatis+Thymeleaf做
-
-
-### 登录验证功能
 [SpringBoot + thymeleaf 实现简单的登陆验证](https://www.jianshu.com/p/442dd9de4e90)
 
-![avatar](doc-files/logo.png)
+[SpringBoot日记——登录与拦截器篇](https://www.cnblogs.com/iceb/p/9227838.html)
 
+[Spring Boot拦截器配置拦截登陆](https://blog.csdn.net/qq_30745307/article/details/80974407)
 
-调试问题记录
-Mybatis查询语句返回的对象中部分字段为null(空)
-https://blog.csdn.net/m0_37961948/article/details/85344944
+[Spring Boot拦截器配置拦截登陆](https://blog.csdn.net/qq_30745307/article/details/80974407)
 
-SpringBoot+MyBatis+thymeleaf 增删改查实例（超详细）
-https://blog.csdn.net/Woo_home/article/details/99564476
+[springboot学习--定时任务及cron表达式](https://blog.csdn.net/baidu_41669919/article/details/79159174)
 
-SpringBoot集成Thymeleaf模板引擎实现数据的增删改查
-https://blog.csdn.net/w252064/article/details/83998724
+图书：《Spring Boot + Vue 全栈开发实战》
 
-解决mybatis的mapper.xml查询不出数据，结果一直为null问题
-https://blog.csdn.net/ITBigGod/article/details/82691295
-
-windows下如何安装配置maven
-https://jingyan.baidu.com/article/3065b3b6a00792becef8a46c.html
-
-阿里巴巴Java开发规约IDEA插件安装及使用
-https://www.cnblogs.com/cnndevelop/p/7697920.html
-
-
-
-
-
-    https://blog.csdn.net/Develop_007/article/details/88568809
-
-
-我的 Input框 不可能这么可爱
-https://blog.csdn.net/weixin_37615279/article/details/100516311
-
-springboot+jwt完成登录认证
-https://www.cnblogs.com/30go/p/10963924.html
-
-
-Spring Boot使用JWT实现系统登录验证
-https://www.cnblogs.com/xifengxiaoma/p/9508477.html
-
-展示某文件夹的文件
-
-SpringBoot + Spring Security 基本使用及个性化登录配置详解
-
-https://www.jb51.net/article/140429.htm
-
-https://blog.csdn.net/qq_30745307/article/details/80974407
-
-SpringBoot日记——登录与拦截器篇
-https://www.cnblogs.com/iceb/p/9227838.html
-
-Spring Boot拦截器配置拦截登陆
-https://blog.csdn.net/qq_30745307/article/details/80974407
-
-springboot学习--定时任务及cron表达式
-https://blog.csdn.net/baidu_41669919/article/details/79159174
-
-可以设置每多少天的某个时间执行
-
-<1>整合MyBatis
-创建项目
-创建数据库、表、实体类等
-创建数据库访问层
-创建PeopleMapper.xml
-创建Service和Controller
-配置pom.xml文件
-
-
-<2>整合Thymeleaf
-
-<3>使用“@Schedule定时任务”
-
-##### 参考图书
-
-* 《Spring Boot + Vue 全栈开发实战》
-* 《Java EE互联网轻量级框架整合开发》（SSM框架（SpringMVC + Spring + MyBatis）和Redis实现）
+图书：《Java EE互联网轻量级框架整合开发》（SSM框架（SpringMVC + Spring + MyBatis）和Redis实现）
