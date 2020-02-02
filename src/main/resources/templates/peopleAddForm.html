@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>添加人物信息</title>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+
+<div>
+    <a href="/peopleControlPanel">返回主页</a>
+</div>
+
+<form action="/add" method="POST" th:object="${peopleModel.people}">
+    <br>ID:<br>
+    <input class="form-control" type="text" name="id" id="id" th:value="*{id}">
+    <br>姓名:<br>
+    <input class="form-control" type="text" name="name" id="name" th:value="*{name}">
+
+    <br>阳历生日:<br>
+    <input class="form-control" type="text" name="solarCalendarBirthday" id="solarCalendarBirthday" th:value="*{solarCalendarBirthday}">
+    <br>阴历生日:<br>
+    <input class="form-control" type="text" name="lunarCalendarBirthday" id="lunarCalendarBirthday" th:value="*{lunarCalendarBirthday}">
+    <input class="btn btn-primary btn-lg btn-block" type="submit" value="提交">
+</form>
+</body>
+</html>

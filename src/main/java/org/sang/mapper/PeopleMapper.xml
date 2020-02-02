@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sang.mapper.PeopleMapper">
+
+    <resultMap id="BaseResultMap" type="org.sang.model.People">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="solar_calendar_birthday" property="solarCalendarBirthday" jdbcType="VARCHAR"/>
+        <result column="lunar_calendar_birthday" property="lunarCalendarBirthday" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--增加人物信息-->
+    <insert id="addPeople"  parameterType="org.sang.model.People">
+        INSERT INTO people(name,solar_calendar_birthday,lunar_calendar_birthday) VALUES (#{name},#{solarCalendarBirthday},#{lunarCalendarBirthday})
+    </insert>
+
+    <!--通过Id删除人物信息-->
+    <delete id="deletePeopleById" parameterType="int">
+        DELETE FROM people WHERE id=#{id}
+    </delete>
+
+    <!--通过Id更新人物信息-->
+    <update id="updatePeopleById" parameterType="org.sang.model.People" >
+        UPDATE people set name=#{name},solar_calendar_birthday=#{solarCalendarBirthday}, lunar_calendar_birthday=#{lunarCalendarBirthday} WHERE id=#{id}
+    </update>
+
+    <!--通过Id获得人物信息-->
+    <select id="getPeopleById" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM people WHERE id=#{id}
+    </select>
+
+    <!--获得人物列表-->
+    <select id="getAllPeople" resultMap="BaseResultMap">
+            SELECT * FROM people
+    </select>
+
+    <!--通过关键字获得人物列表-->
+    <select id="getAllPeopleByKeyword" parameterType="string" resultMap="BaseResultMap">
+            SELECT * FROM people
+            where name like concat('%', #{keyword}, '%')
+            ORDER BY id ASC
+    </select>
+
+    <!--获得所有人物的列表，同时按照关键字排序-->
+    <select id="getAllPeopleAndOrderByKeyword" parameterType="string" resultMap="BaseResultMap">
+            SELECT * FROM people
+
+            ORDER BY ${keyword} DESC
+    </select>
+
+    <!--通过生日获得人物列表-->
+    <select id="getAllPeopleByBirthday" parameterType="string" resultMap="BaseResultMap">
+            SELECT * FROM people
+            where solar_calendar_birthday like concat('%', #{keyword}, '%')
+    </select>
+</mapper>

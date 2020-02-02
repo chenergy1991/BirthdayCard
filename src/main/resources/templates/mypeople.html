@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HappyBirthday</title>
+</head>
+<body>
+<table border="1">
+    <tr>
+        <td>人物编号</td>
+        <td>人物姓名</td>
+        <td>人物阳历生日</td>
+        <td>人物阴历生日</td>
+
+    </tr>
+    <tr th:each="p:${people}">
+        <td th:text="${p.id}"></td>
+        <td th:text="${p.name}"></td>
+        <td th:text="${p.solarCalendarBirthday}"></td>
+        <td th:text="${p.lunarCalendarBirthday}"></td>
+
+    </tr>
+</table>
+</body>
+</html>

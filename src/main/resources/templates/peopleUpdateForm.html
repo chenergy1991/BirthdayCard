@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>修改人物信息</title>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+
+<div style="width:800px;height:100%;margin-left:270px;">
+    <form action="/update" method="post">
+        ID：<input class="form-control" name="id" type="text" th:value="${people.id}" readonly="readonly"><br>
+        人物：<input class="form-control" type="text" th:value="${people.name}" name="name"><br>
+        阳历生日：<input class="form-control" type="text" th:value="${people.solarCalendarBirthday}" name="solarCalendarBirthday"><br>
+        阴历生日：<input class="form-control" type="text" th:value="${people.lunarCalendarBirthday}" name="lunarCalendarBirthday"><br>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">提交</button>
+    </form>
+</div>
