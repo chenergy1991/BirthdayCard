@@ -46,8 +46,10 @@
     <!--获得所有人物的列表，同时按照关键字排序-->
     <select id="getAllPeopleAndOrderByKeyword" parameterType="string" resultMap="BaseResultMap">
             SELECT * FROM people
-
-            ORDER BY ${keyword} DESC
+            <if test = "keyword == 'id' or keyword == 'name' or keyword == 'solar_calendar_birthday' or keyword == 'lunar_calendar_birthday'">
+                ORDER BY ${keyword} DESC
+            </if>
+            <!--ORDER BY ${keyword} DESC-->
     </select>
 
     <!--通过生日获得人物列表-->
