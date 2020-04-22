@@ -1,13 +1,13 @@
 package org.sang.controller;
 
+import org.sang.component.PoiUtils;
 import org.sang.model.People;
 import org.sang.service.PeopleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -186,4 +186,36 @@ public class PeopleController {
         mv.setViewName("mypeople");
         return mv;
     }
+
+    /**
+     *功能描述：导出所有人物信息到Excel
+     * @author Chenergy
+     * @date 2020/03/09
+     * @param
+     * @return
+     */
+    @GetMapping("/exportPeople")
+    public ResponseEntity<byte []> exportPeople() {
+        return PoiUtils.exportPeople2Excel(peopleService.getAllPeople());
+    }
+
+    /**
+     *功能描述：根据Excel导入人物信息
+     * @author Chenergy
+     * @date 2020/04/08
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "/importPeople", method = RequestMethod.POST)
+    public String importPeople(MultipartFile file){
+        List <People>peopleList = PoiUtils.importPeople2List(file);
+        System.out.print("peopleList.size() is" + peopleList.size());
+        for(int i = 0; i < peopleList.size();i++)
+        {
+            peopleService.addPeople(peopleList.get(i));
+        }
+        return "0";
+    }
+//    //https://www.javatt.com/p/28620
+
 }

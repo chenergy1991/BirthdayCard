@@ -36,8 +36,20 @@
         </tr>
     </tbody>
     </table>
+
     <div style="width:200px;height:100%;">
         <button class="btn btn-primary form-control" style="height:50px"><a th:href="@{'/peopleAddForm'}">添加用户</a></button>
+    </div>
+
+    <div style="width:200px;height:100%;">
+        <button class="btn btn-primary form-control" style="height:50px"><a th:href="@{'/exportPeople'}">导出用户</a></button>
+    </div>
+
+    <div>
+        <form enctype="multipart/form-data" method="post" action="/importPeople">    
+            请选择包含人物信息的Excel表格：<input type="file" name="file"/><br/>    
+            <input type="submit" value="上传"/>
+        </form>
     </div>
 </body>
 </html>
